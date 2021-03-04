@@ -35,6 +35,7 @@
     "babel": "babel temp/rot.js -o dist/rot.js",
     "gcc": "google-closure-compiler --js=dist/rot.js --js_output_file=dist/rot.min.js",
     "build": "npm run tsc && npm run rollup && npm run babel && npm run gcc",
+    "doc": "typedoc --out doc --readme none --excludePrivate --excludeProtected --listInvalidSymbolLinks --name \"rot.js\" src",
     "test": "node tests/run.js"
   },
   "repository": {
