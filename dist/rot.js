@@ -6,10 +6,12 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) : typeof define === 'function' && define.amd ? define(['exports'], factory) : factory(global.ROT = {});
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) : typeof define === 'function' && define.amd ? define(['exports'], factory) : (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.ROT = {}));
 })(this, function (exports) {
   'use strict';
   /**
@@ -362,6 +364,7 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
     "s": "toString"
   };
   var util = /*#__PURE__*/Object.freeze({
+    __proto__: null,
     mod: mod,
     clamp: clamp,
     capitalize: capitalize,
@@ -539,157 +542,151 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
    */
 
 
-  var Rect =
-  /** @class */
-  function () {
-    var Rect = /*#__PURE__*/function (_Canvas2) {
-      _inheritsLoose(Rect, _Canvas2);
+  var Rect = /*#__PURE__*/function (_Canvas2) {
+    _inheritsLoose(Rect, _Canvas2);
 
-      function Rect() {
-        var _this3;
+    function Rect() {
+      var _this3;
 
-        _this3 = _Canvas2.call(this) || this;
-        _this3._spacingX = 0;
-        _this3._spacingY = 0;
-        _this3._canvasCache = {};
-        return _this3;
+      _this3 = _Canvas2.call(this) || this;
+      _this3._spacingX = 0;
+      _this3._spacingY = 0;
+      _this3._canvasCache = {};
+      return _this3;
+    }
+
+    var _proto5 = Rect.prototype;
+
+    _proto5.setOptions = function setOptions(options) {
+      _Canvas2.prototype.setOptions.call(this, options);
+
+      this._canvasCache = {};
+    };
+
+    _proto5.draw = function draw(data, clearBefore) {
+      if (Rect.cache) {
+        this._drawWithCache(data);
+      } else {
+        this._drawNoCache(data, clearBefore);
+      }
+    };
+
+    _proto5._drawWithCache = function _drawWithCache(data) {
+      var x = data[0],
+          y = data[1],
+          ch = data[2],
+          fg = data[3],
+          bg = data[4];
+      var hash = "" + ch + fg + bg;
+      var canvas;
+
+      if (hash in this._canvasCache) {
+        canvas = this._canvasCache[hash];
+      } else {
+        var b = this._options.border;
+        canvas = document.createElement("canvas");
+        var ctx = canvas.getContext("2d");
+        canvas.width = this._spacingX;
+        canvas.height = this._spacingY;
+        ctx.fillStyle = bg;
+        ctx.fillRect(b, b, canvas.width - b, canvas.height - b);
+
+        if (ch) {
+          ctx.fillStyle = fg;
+          ctx.font = this._ctx.font;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          var chars = [].concat(ch);
+
+          for (var i = 0; i < chars.length; i++) {
+            ctx.fillText(chars[i], this._spacingX / 2, Math.ceil(this._spacingY / 2));
+          }
+        }
+
+        this._canvasCache[hash] = canvas;
       }
 
-      var _proto5 = Rect.prototype;
+      this._ctx.drawImage(canvas, x * this._spacingX, y * this._spacingY);
+    };
 
-      _proto5.setOptions = function setOptions(options) {
-        _Canvas2.prototype.setOptions.call(this, options);
+    _proto5._drawNoCache = function _drawNoCache(data, clearBefore) {
+      var x = data[0],
+          y = data[1],
+          ch = data[2],
+          fg = data[3],
+          bg = data[4];
 
-        this._canvasCache = {};
-      };
+      if (clearBefore) {
+        var b = this._options.border;
+        this._ctx.fillStyle = bg;
 
-      _proto5.draw = function draw(data, clearBefore) {
-        if (Rect.cache) {
-          this._drawWithCache(data);
-        } else {
-          this._drawNoCache(data, clearBefore);
-        }
-      };
+        this._ctx.fillRect(x * this._spacingX + b, y * this._spacingY + b, this._spacingX - b, this._spacingY - b);
+      }
 
-      _proto5._drawWithCache = function _drawWithCache(data) {
-        var x = data[0],
-            y = data[1],
-            ch = data[2],
-            fg = data[3],
-            bg = data[4];
-        var hash = "" + ch + fg + bg;
-        var canvas;
+      if (!ch) {
+        return;
+      }
 
-        if (hash in this._canvasCache) {
-          canvas = this._canvasCache[hash];
-        } else {
-          var b = this._options.border;
-          canvas = document.createElement("canvas");
-          var ctx = canvas.getContext("2d");
-          canvas.width = this._spacingX;
-          canvas.height = this._spacingY;
-          ctx.fillStyle = bg;
-          ctx.fillRect(b, b, canvas.width - b, canvas.height - b);
+      this._ctx.fillStyle = fg;
+      var chars = [].concat(ch);
 
-          if (ch) {
-            ctx.fillStyle = fg;
-            ctx.font = this._ctx.font;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            var chars = [].concat(ch);
+      for (var i = 0; i < chars.length; i++) {
+        this._ctx.fillText(chars[i], (x + 0.5) * this._spacingX, Math.ceil((y + 0.5) * this._spacingY));
+      }
+    };
 
-            for (var i = 0; i < chars.length; i++) {
-              ctx.fillText(chars[i], this._spacingX / 2, Math.ceil(this._spacingY / 2));
-            }
-          }
+    _proto5.computeSize = function computeSize(availWidth, availHeight) {
+      var width = Math.floor(availWidth / this._spacingX);
+      var height = Math.floor(availHeight / this._spacingY);
+      return [width, height];
+    };
 
-          this._canvasCache[hash] = canvas;
-        }
+    _proto5.computeFontSize = function computeFontSize(availWidth, availHeight) {
+      var boxWidth = Math.floor(availWidth / this._options.width);
+      var boxHeight = Math.floor(availHeight / this._options.height);
+      /* compute char ratio */
 
-        this._ctx.drawImage(canvas, x * this._spacingX, y * this._spacingY);
-      };
+      var oldFont = this._ctx.font;
+      this._ctx.font = "100px " + this._options.fontFamily;
+      var width = Math.ceil(this._ctx.measureText("W").width);
+      this._ctx.font = oldFont;
+      var ratio = width / 100;
+      var widthFraction = ratio * boxHeight / boxWidth;
 
-      _proto5._drawNoCache = function _drawNoCache(data, clearBefore) {
-        var x = data[0],
-            y = data[1],
-            ch = data[2],
-            fg = data[3],
-            bg = data[4];
+      if (widthFraction > 1) {
+        /* too wide with current aspect ratio */
+        boxHeight = Math.floor(boxHeight / widthFraction);
+      }
 
-        if (clearBefore) {
-          var b = this._options.border;
-          this._ctx.fillStyle = bg;
+      return Math.floor(boxHeight / this._options.spacing);
+    };
 
-          this._ctx.fillRect(x * this._spacingX + b, y * this._spacingY + b, this._spacingX - b, this._spacingY - b);
-        }
+    _proto5._normalizedEventToPosition = function _normalizedEventToPosition(x, y) {
+      return [Math.floor(x / this._spacingX), Math.floor(y / this._spacingY)];
+    };
 
-        if (!ch) {
-          return;
-        }
+    _proto5._updateSize = function _updateSize() {
+      var opts = this._options;
+      var charWidth = Math.ceil(this._ctx.measureText("W").width);
+      this._spacingX = Math.ceil(opts.spacing * charWidth);
+      this._spacingY = Math.ceil(opts.spacing * opts.fontSize);
 
-        this._ctx.fillStyle = fg;
-        var chars = [].concat(ch);
+      if (opts.forceSquareRatio) {
+        this._spacingX = this._spacingY = Math.max(this._spacingX, this._spacingY);
+      }
 
-        for (var i = 0; i < chars.length; i++) {
-          this._ctx.fillText(chars[i], (x + 0.5) * this._spacingX, Math.ceil((y + 0.5) * this._spacingY));
-        }
-      };
+      this._ctx.canvas.width = opts.width * this._spacingX;
+      this._ctx.canvas.height = opts.height * this._spacingY;
+    };
 
-      _proto5.computeSize = function computeSize(availWidth, availHeight) {
-        var width = Math.floor(availWidth / this._spacingX);
-        var height = Math.floor(availHeight / this._spacingY);
-        return [width, height];
-      };
-
-      _proto5.computeFontSize = function computeFontSize(availWidth, availHeight) {
-        var boxWidth = Math.floor(availWidth / this._options.width);
-        var boxHeight = Math.floor(availHeight / this._options.height);
-        /* compute char ratio */
-
-        var oldFont = this._ctx.font;
-        this._ctx.font = "100px " + this._options.fontFamily;
-        var width = Math.ceil(this._ctx.measureText("W").width);
-        this._ctx.font = oldFont;
-        var ratio = width / 100;
-        var widthFraction = ratio * boxHeight / boxWidth;
-
-        if (widthFraction > 1) {
-          /* too wide with current aspect ratio */
-          boxHeight = Math.floor(boxHeight / widthFraction);
-        }
-
-        return Math.floor(boxHeight / this._options.spacing);
-      };
-
-      _proto5._normalizedEventToPosition = function _normalizedEventToPosition(x, y) {
-        return [Math.floor(x / this._spacingX), Math.floor(y / this._spacingY)];
-      };
-
-      _proto5._updateSize = function _updateSize() {
-        var opts = this._options;
-        var charWidth = Math.ceil(this._ctx.measureText("W").width);
-        this._spacingX = Math.ceil(opts.spacing * charWidth);
-        this._spacingY = Math.ceil(opts.spacing * opts.fontSize);
-
-        if (opts.forceSquareRatio) {
-          this._spacingX = this._spacingY = Math.max(this._spacingX, this._spacingY);
-        }
-
-        this._ctx.canvas.width = opts.width * this._spacingX;
-        this._ctx.canvas.height = opts.height * this._spacingY;
-      };
-
-      return Rect;
-    }(Canvas);
-
-    Rect.cache = false;
     return Rect;
-  }();
+  }(Canvas);
+
+  Rect.cache = false;
   /**
    * @class Tile backend
    * @private
    */
-
 
   var Tile = /*#__PURE__*/function (_Canvas3) {
     _inheritsLoose(Tile, _Canvas3);
@@ -1206,6 +1203,7 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
     "white": [255, 255, 255]
   };
   var color = /*#__PURE__*/Object.freeze({
+    __proto__: null,
     fromString: fromString,
     add: add,
     add_: add_,
@@ -1501,29 +1499,29 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
 
   var colorCache = {};
 
-  function parseColor(color) {
-    if (!(color in colorCache)) {
+  function parseColor(color$1) {
+    if (!(color$1 in colorCache)) {
       var parsed;
 
-      if (color == "transparent") {
+      if (color$1 == "transparent") {
         parsed = [0, 0, 0, 0];
-      } else if (color.indexOf("rgba") > -1) {
-        parsed = (color.match(/[\d.]+/g) || []).map(Number);
+      } else if (color$1.indexOf("rgba") > -1) {
+        parsed = (color$1.match(/[\d.]+/g) || []).map(Number);
 
         for (var i = 0; i < 3; i++) {
           parsed[i] = parsed[i] / 255;
         }
       } else {
-        parsed = fromString(color).map(function ($) {
+        parsed = fromString(color$1).map(function ($) {
           return $ / 255;
         });
         parsed.push(1);
       }
 
-      colorCache[color] = parsed;
+      colorCache[color$1] = parsed;
     }
 
-    return colorCache[color];
+    return colorCache[color$1];
   }
 
   function clearToAnsi(bg) {
@@ -1538,11 +1536,11 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
     return "\x1B[" + (y + 1) + ";" + (x + 1) + "H";
   }
 
-  function termcolor(color) {
+  function termcolor(color$1) {
     var SRC_COLORS = 256.0;
     var DST_COLORS = 6.0;
     var COLOR_RATIO = DST_COLORS / SRC_COLORS;
-    var rgb = fromString(color);
+    var rgb = fromString(color$1);
     var r = Math.floor(rgb[0] * COLOR_RATIO);
     var g = Math.floor(rgb[1] * COLOR_RATIO);
     var b = Math.floor(rgb[2] * COLOR_RATIO);
@@ -1912,6 +1910,7 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
   }
 
   var text = /*#__PURE__*/Object.freeze({
+    __proto__: null,
     TYPE_TEXT: TYPE_TEXT,
     TYPE_NEWLINE: TYPE_NEWLINE,
     TYPE_FG: TYPE_FG,
@@ -2423,321 +2422,315 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
    * @class Visual map display
    */
 
-  var Display =
-  /** @class */
-  function () {
-    var Display = /*#__PURE__*/function () {
-      function Display(options) {
-        if (options === void 0) {
-          options = {};
+  var Display = /*#__PURE__*/function () {
+    function Display(options) {
+      if (options === void 0) {
+        options = {};
+      }
+
+      this._data = {};
+      this._dirty = false; // false = nothing, true = all, object = dirty cells
+
+      this._options = {};
+      options = Object.assign({}, DEFAULT_OPTIONS, options);
+      this.setOptions(options);
+      this.DEBUG = this.DEBUG.bind(this);
+      this._tick = this._tick.bind(this);
+
+      this._backend.schedule(this._tick);
+    }
+    /**
+     * Debug helper, ideal as a map generator callback. Always bound to this.
+     * @param {int} x
+     * @param {int} y
+     * @param {int} what
+     */
+
+
+    var _proto9 = Display.prototype;
+
+    _proto9.DEBUG = function DEBUG(x, y, what) {
+      var colors = [this._options.bg, this._options.fg];
+      this.draw(x, y, null, null, colors[what % colors.length]);
+    }
+    /**
+     * Clear the whole display (cover it with background color)
+     */
+    ;
+
+    _proto9.clear = function clear() {
+      this._data = {};
+      this._dirty = true;
+    }
+    /**
+     * @see ROT.Display
+     */
+    ;
+
+    _proto9.setOptions = function setOptions(options) {
+      Object.assign(this._options, options);
+
+      if (options.width || options.height || options.fontSize || options.fontFamily || options.spacing || options.layout) {
+        if (options.layout) {
+          var ctor = BACKENDS[options.layout];
+          this._backend = new ctor();
         }
 
-        this._data = {};
-        this._dirty = false; // false = nothing, true = all, object = dirty cells
+        this._backend.setOptions(this._options);
 
-        this._options = {};
-        options = Object.assign({}, DEFAULT_OPTIONS, options);
-        this.setOptions(options);
-        this.DEBUG = this.DEBUG.bind(this);
-        this._tick = this._tick.bind(this);
-
-        this._backend.schedule(this._tick);
-      }
-      /**
-       * Debug helper, ideal as a map generator callback. Always bound to this.
-       * @param {int} x
-       * @param {int} y
-       * @param {int} what
-       */
-
-
-      var _proto9 = Display.prototype;
-
-      _proto9.DEBUG = function DEBUG(x, y, what) {
-        var colors = [this._options.bg, this._options.fg];
-        this.draw(x, y, null, null, colors[what % colors.length]);
-      }
-      /**
-       * Clear the whole display (cover it with background color)
-       */
-      ;
-
-      _proto9.clear = function clear() {
-        this._data = {};
         this._dirty = true;
       }
-      /**
-       * @see ROT.Display
-       */
-      ;
 
-      _proto9.setOptions = function setOptions(options) {
-        Object.assign(this._options, options);
+      return this;
+    }
+    /**
+     * Returns currently set options
+     */
+    ;
 
-        if (options.width || options.height || options.fontSize || options.fontFamily || options.spacing || options.layout) {
-          if (options.layout) {
-            var ctor = BACKENDS[options.layout];
-            this._backend = new ctor();
-          }
+    _proto9.getOptions = function getOptions() {
+      return this._options;
+    }
+    /**
+     * Returns the DOM node of this display
+     */
+    ;
 
-          this._backend.setOptions(this._options);
+    _proto9.getContainer = function getContainer() {
+      return this._backend.getContainer();
+    }
+    /**
+     * Compute the maximum width/height to fit into a set of given constraints
+     * @param {int} availWidth Maximum allowed pixel width
+     * @param {int} availHeight Maximum allowed pixel height
+     * @returns {int[2]} cellWidth,cellHeight
+     */
+    ;
 
-          this._dirty = true;
-        }
+    _proto9.computeSize = function computeSize(availWidth, availHeight) {
+      return this._backend.computeSize(availWidth, availHeight);
+    }
+    /**
+     * Compute the maximum font size to fit into a set of given constraints
+     * @param {int} availWidth Maximum allowed pixel width
+     * @param {int} availHeight Maximum allowed pixel height
+     * @returns {int} fontSize
+     */
+    ;
 
-        return this;
+    _proto9.computeFontSize = function computeFontSize(availWidth, availHeight) {
+      return this._backend.computeFontSize(availWidth, availHeight);
+    };
+
+    _proto9.computeTileSize = function computeTileSize(availWidth, availHeight) {
+      var width = Math.floor(availWidth / this._options.width);
+      var height = Math.floor(availHeight / this._options.height);
+      return [width, height];
+    }
+    /**
+     * Convert a DOM event (mouse or touch) to map coordinates. Uses first touch for multi-touch.
+     * @param {Event} e event
+     * @returns {int[2]} -1 for values outside of the canvas
+     */
+    ;
+
+    _proto9.eventToPosition = function eventToPosition(e) {
+      var x, y;
+
+      if ("touches" in e) {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+      } else {
+        x = e.clientX;
+        y = e.clientY;
       }
-      /**
-       * Returns currently set options
-       */
-      ;
 
-      _proto9.getOptions = function getOptions() {
-        return this._options;
+      return this._backend.eventToPosition(x, y);
+    }
+    /**
+     * @param {int} x
+     * @param {int} y
+     * @param {string || string[]} ch One or more chars (will be overlapping themselves)
+     * @param {string} [fg] foreground color
+     * @param {string} [bg] background color
+     */
+    ;
+
+    _proto9.draw = function draw(x, y, ch, fg, bg) {
+      if (!fg) {
+        fg = this._options.fg;
       }
-      /**
-       * Returns the DOM node of this display
-       */
-      ;
 
-      _proto9.getContainer = function getContainer() {
-        return this._backend.getContainer();
+      if (!bg) {
+        bg = this._options.bg;
       }
-      /**
-       * Compute the maximum width/height to fit into a set of given constraints
-       * @param {int} availWidth Maximum allowed pixel width
-       * @param {int} availHeight Maximum allowed pixel height
-       * @returns {int[2]} cellWidth,cellHeight
-       */
-      ;
 
-      _proto9.computeSize = function computeSize(availWidth, availHeight) {
-        return this._backend.computeSize(availWidth, availHeight);
+      var key = x + "," + y;
+      this._data[key] = [x, y, ch, fg, bg];
+
+      if (this._dirty === true) {
+        return;
+      } // will already redraw everything 
+
+
+      if (!this._dirty) {
+        this._dirty = {};
+      } // first!
+
+
+      this._dirty[key] = true;
+    }
+    /**
+     * Draws a text at given position. Optionally wraps at a maximum length. Currently does not work with hex layout.
+     * @param {int} x
+     * @param {int} y
+     * @param {string} text May contain color/background format specifiers, %c{name}/%b{name}, both optional. %c{}/%b{} resets to default.
+     * @param {int} [maxWidth] wrap at what width?
+     * @returns {int} lines drawn
+     */
+    ;
+
+    _proto9.drawText = function drawText(x, y, text$1, maxWidth) {
+      var fg = null;
+      var bg = null;
+      var cx = x;
+      var cy = y;
+      var lines = 1;
+
+      if (!maxWidth) {
+        maxWidth = this._options.width - x;
       }
-      /**
-       * Compute the maximum font size to fit into a set of given constraints
-       * @param {int} availWidth Maximum allowed pixel width
-       * @param {int} availHeight Maximum allowed pixel height
-       * @returns {int} fontSize
-       */
-      ;
 
-      _proto9.computeFontSize = function computeFontSize(availWidth, availHeight) {
-        return this._backend.computeFontSize(availWidth, availHeight);
-      };
+      var tokens = tokenize(text$1, maxWidth);
 
-      _proto9.computeTileSize = function computeTileSize(availWidth, availHeight) {
-        var width = Math.floor(availWidth / this._options.width);
-        var height = Math.floor(availHeight / this._options.height);
-        return [width, height];
+      while (tokens.length) {
+        // interpret tokenized opcode stream
+        var token = tokens.shift();
+
+        switch (token.type) {
+          case TYPE_TEXT:
+            var isSpace = false,
+                isPrevSpace = false,
+                isFullWidth = false,
+                isPrevFullWidth = false;
+
+            for (var i = 0; i < token.value.length; i++) {
+              var cc = token.value.charCodeAt(i);
+              var c = token.value.charAt(i);
+
+              if (this._options.layout === "term") {
+                var cch = cc >> 8;
+                var isCJK = cch === 0x11 || cch >= 0x2e && cch <= 0x9f || cch >= 0xac && cch <= 0xd7 || cc >= 0xA960 && cc <= 0xA97F;
+
+                if (isCJK) {
+                  this.draw(cx + 0, cy, c, fg, bg);
+                  this.draw(cx + 1, cy, "\t", fg, bg);
+                  cx += 2;
+                  continue;
+                }
+              } // Assign to `true` when the current char is full-width.
+
+
+              isFullWidth = cc > 0xff00 && cc < 0xff61 || cc > 0xffdc && cc < 0xffe8 || cc > 0xffee; // Current char is space, whatever full-width or half-width both are OK.
+
+              isSpace = c.charCodeAt(0) == 0x20 || c.charCodeAt(0) == 0x3000; // The previous char is full-width and
+              // current char is nether half-width nor a space.
+
+              if (isPrevFullWidth && !isFullWidth && !isSpace) {
+                cx++;
+              } // add an extra position
+              // The current char is full-width and
+              // the previous char is not a space.
+
+
+              if (isFullWidth && !isPrevSpace) {
+                cx++;
+              } // add an extra position
+
+
+              this.draw(cx++, cy, c, fg, bg);
+              isPrevSpace = isSpace;
+              isPrevFullWidth = isFullWidth;
+            }
+
+            break;
+
+          case TYPE_FG:
+            fg = token.value || null;
+            break;
+
+          case TYPE_BG:
+            bg = token.value || null;
+            break;
+
+          case TYPE_NEWLINE:
+            cx = x;
+            cy++;
+            lines++;
+            break;
+        }
       }
-      /**
-       * Convert a DOM event (mouse or touch) to map coordinates. Uses first touch for multi-touch.
-       * @param {Event} e event
-       * @returns {int[2]} -1 for values outside of the canvas
-       */
-      ;
 
-      _proto9.eventToPosition = function eventToPosition(e) {
-        var x, y;
+      return lines;
+    }
+    /**
+     * Timer tick: update dirty parts
+     */
+    ;
 
-        if ("touches" in e) {
-          x = e.touches[0].clientX;
-          y = e.touches[0].clientY;
-        } else {
-          x = e.clientX;
-          y = e.clientY;
-        }
+    _proto9._tick = function _tick() {
+      this._backend.schedule(this._tick);
 
-        return this._backend.eventToPosition(x, y);
+      if (!this._dirty) {
+        return;
       }
-      /**
-       * @param {int} x
-       * @param {int} y
-       * @param {string || string[]} ch One or more chars (will be overlapping themselves)
-       * @param {string} [fg] foreground color
-       * @param {string} [bg] background color
-       */
-      ;
 
-      _proto9.draw = function draw(x, y, ch, fg, bg) {
-        if (!fg) {
-          fg = this._options.fg;
+      if (this._dirty === true) {
+        // draw all
+        this._backend.clear();
+
+        for (var id in this._data) {
+          this._draw(id, false);
+        } // redraw cached data 
+
+      } else {
+        // draw only dirty 
+        for (var key in this._dirty) {
+          this._draw(key, true);
         }
-
-        if (!bg) {
-          bg = this._options.bg;
-        }
-
-        var key = x + "," + y;
-        this._data[key] = [x, y, ch, fg, bg];
-
-        if (this._dirty === true) {
-          return;
-        } // will already redraw everything 
-
-
-        if (!this._dirty) {
-          this._dirty = {};
-        } // first!
-
-
-        this._dirty[key] = true;
       }
-      /**
-       * Draws a text at given position. Optionally wraps at a maximum length. Currently does not work with hex layout.
-       * @param {int} x
-       * @param {int} y
-       * @param {string} text May contain color/background format specifiers, %c{name}/%b{name}, both optional. %c{}/%b{} resets to default.
-       * @param {int} [maxWidth] wrap at what width?
-       * @returns {int} lines drawn
-       */
-      ;
 
-      _proto9.drawText = function drawText(x, y, text, maxWidth) {
-        var fg = null;
-        var bg = null;
-        var cx = x;
-        var cy = y;
-        var lines = 1;
+      this._dirty = false;
+    }
+    /**
+     * @param {string} key What to draw
+     * @param {bool} clearBefore Is it necessary to clean before?
+     */
+    ;
 
-        if (!maxWidth) {
-          maxWidth = this._options.width - x;
-        }
+    _proto9._draw = function _draw(key, clearBefore) {
+      var data = this._data[key];
 
-        var tokens = tokenize(text, maxWidth);
-
-        while (tokens.length) {
-          // interpret tokenized opcode stream
-          var token = tokens.shift();
-
-          switch (token.type) {
-            case TYPE_TEXT:
-              var isSpace = false,
-                  isPrevSpace = false,
-                  isFullWidth = false,
-                  isPrevFullWidth = false;
-
-              for (var i = 0; i < token.value.length; i++) {
-                var cc = token.value.charCodeAt(i);
-                var c = token.value.charAt(i);
-
-                if (this._options.layout === "term") {
-                  var cch = cc >> 8;
-                  var isCJK = cch === 0x11 || cch >= 0x2e && cch <= 0x9f || cch >= 0xac && cch <= 0xd7 || cc >= 0xA960 && cc <= 0xA97F;
-
-                  if (isCJK) {
-                    this.draw(cx + 0, cy, c, fg, bg);
-                    this.draw(cx + 1, cy, "\t", fg, bg);
-                    cx += 2;
-                    continue;
-                  }
-                } // Assign to `true` when the current char is full-width.
-
-
-                isFullWidth = cc > 0xff00 && cc < 0xff61 || cc > 0xffdc && cc < 0xffe8 || cc > 0xffee; // Current char is space, whatever full-width or half-width both are OK.
-
-                isSpace = c.charCodeAt(0) == 0x20 || c.charCodeAt(0) == 0x3000; // The previous char is full-width and
-                // current char is nether half-width nor a space.
-
-                if (isPrevFullWidth && !isFullWidth && !isSpace) {
-                  cx++;
-                } // add an extra position
-                // The current char is full-width and
-                // the previous char is not a space.
-
-
-                if (isFullWidth && !isPrevSpace) {
-                  cx++;
-                } // add an extra position
-
-
-                this.draw(cx++, cy, c, fg, bg);
-                isPrevSpace = isSpace;
-                isPrevFullWidth = isFullWidth;
-              }
-
-              break;
-
-            case TYPE_FG:
-              fg = token.value || null;
-              break;
-
-            case TYPE_BG:
-              bg = token.value || null;
-              break;
-
-            case TYPE_NEWLINE:
-              cx = x;
-              cy++;
-              lines++;
-              break;
-          }
-        }
-
-        return lines;
+      if (data[4] != this._options.bg) {
+        clearBefore = true;
       }
-      /**
-       * Timer tick: update dirty parts
-       */
-      ;
 
-      _proto9._tick = function _tick() {
-        this._backend.schedule(this._tick);
+      this._backend.draw(data, clearBefore);
+    };
 
-        if (!this._dirty) {
-          return;
-        }
-
-        if (this._dirty === true) {
-          // draw all
-          this._backend.clear();
-
-          for (var id in this._data) {
-            this._draw(id, false);
-          } // redraw cached data 
-
-        } else {
-          // draw only dirty 
-          for (var key in this._dirty) {
-            this._draw(key, true);
-          }
-        }
-
-        this._dirty = false;
-      }
-      /**
-       * @param {string} key What to draw
-       * @param {bool} clearBefore Is it necessary to clean before?
-       */
-      ;
-
-      _proto9._draw = function _draw(key, clearBefore) {
-        var data = this._data[key];
-
-        if (data[4] != this._options.bg) {
-          clearBefore = true;
-        }
-
-        this._backend.draw(data, clearBefore);
-      };
-
-      return Display;
-    }();
-
-    Display.Rect = Rect;
-    Display.Hex = Hex;
-    Display.Tile = Tile;
-    Display.TileGL = TileGL;
-    Display.Term = Term;
     return Display;
   }();
+
+  Display.Rect = Rect;
+  Display.Hex = Hex;
+  Display.Tile = Tile;
+  Display.TileGL = TileGL;
+  Display.Term = Term;
   /**
    * @class (Markov process)-based string generator.
    * Copied from a <a href="http://www.roguebasin.roguelikedevelopment.org/index.php?title=Names_from_a_high_order_Markov_Process_and_a_simplified_Katz_back-off_scheme">RogueBasin article</a>.
    * Offers configurable order and prior.
    */
-
 
   var StringGenerator = /*#__PURE__*/function () {
     function StringGenerator(options) {
@@ -3417,7 +3410,7 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
     return Action;
   }(Scheduler);
 
-  var index = {
+  var index$4 = {
     Simple: Simple,
     Speed: Speed,
     Action: Action
@@ -3475,7 +3468,6 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
 
         default:
           throw new Error("Incorrect topology for FOV computation");
-          break;
       }
       /* starting neighbor */
 
@@ -4000,7 +3992,7 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
     return RecursiveShadowcasting;
   }(FOV);
 
-  var index$1 = {
+  var index$3 = {
     DiscreteShadowcasting: DiscreteShadowcasting,
     PreciseShadowcasting: PreciseShadowcasting,
     RecursiveShadowcasting: RecursiveShadowcasting
@@ -6686,7 +6678,7 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
     return Simplex;
   }(Noise);
 
-  var index$3 = {
+  var index$1 = {
     Simplex: Simplex
   };
   /**
@@ -6946,24 +6938,21 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
       switch (this._options.topology) {
         case 4:
           return Math.abs(x - this._fromX) + Math.abs(y - this._fromY);
-          break;
 
         case 6:
           var dx = Math.abs(x - this._fromX);
           var dy = Math.abs(y - this._fromY);
           return dy + Math.max(0, (dx - dy) / 2);
-          break;
 
         case 8:
           return Math.max(Math.abs(x - this._fromX), Math.abs(y - this._fromY));
-          break;
       }
     };
 
     return AStar;
   }(Path);
 
-  var index$4 = {
+  var index = {
     Dijkstra: Dijkstra,
     AStar: AStar
   };
@@ -7085,11 +7074,11 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
      */
     ;
 
-    _proto38.setLight = function setLight(x, y, color) {
+    _proto38.setLight = function setLight(x, y, color$1) {
       var key = x + "," + y;
 
-      if (color) {
-        this._lights[key] = typeof color == "string" ? fromString(color) : color;
+      if (color$1) {
+        this._lights[key] = typeof color$1 == "string" ? fromString(color$1) : color$1;
       } else {
         delete this._lights[key];
       }
@@ -7297,26 +7286,25 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
   var Util = util;
   var Color = color;
   var Text = text;
-  exports.Util = Util;
   exports.Color = Color;
-  exports.Text = Text;
-  exports.RNG = RNG$1;
-  exports.Display = Display;
-  exports.StringGenerator = StringGenerator;
-  exports.EventQueue = EventQueue;
-  exports.Scheduler = index;
-  exports.FOV = index$1;
-  exports.Map = index$2;
-  exports.Noise = index$3;
-  exports.Path = index$4;
-  exports.Engine = Engine;
-  exports.Lighting = Lighting;
-  exports.DEFAULT_WIDTH = DEFAULT_WIDTH;
   exports.DEFAULT_HEIGHT = DEFAULT_HEIGHT;
+  exports.DEFAULT_WIDTH = DEFAULT_WIDTH;
   exports.DIRS = DIRS;
+  exports.Display = Display;
+  exports.Engine = Engine;
+  exports.EventQueue = EventQueue;
+  exports.FOV = index$3;
   exports.KEYS = KEYS;
+  exports.Lighting = Lighting;
+  exports.Map = index$2;
+  exports.Noise = index$1;
+  exports.Path = index;
+  exports.RNG = RNG$1;
+  exports.Scheduler = index$4;
+  exports.StringGenerator = StringGenerator;
+  exports.Text = Text;
+  exports.Util = Util;
   Object.defineProperty(exports, '__esModule', {
     value: true
   });
 });
-

@@ -30,7 +30,12 @@
   "main": "dist/rot.js",
   "module": "lib/index.js",
   "scripts": {
-    "test": "make test"
+    "tsc": "tsc",
+    "rollup": "rollup -c",
+    "babel": "babel temp/rot.js -o dist/rot.js",
+    "gcc": "google-closure-compiler --js=dist/rot.js --js_output_file=dist/rot.min.js",
+    "build": "npm run tsc && npm run rollup && npm run babel && npm run gcc",
+    "test": "node tests/run.js"
   },
   "repository": {
     "type": "git",
@@ -43,7 +48,7 @@
     "@types/node": "^14.14.31",
     "google-closure-compiler": "^20210202.0.0",
     "jasmine": "^3.6.4",
-    "puppeteer-core": "^8.0.0",
+    "puppeteer": "^8.0.0",
     "rollup": "^2.40.0",
     "typedoc": "^0.20.29",
     "typescript": "^4.2.2"

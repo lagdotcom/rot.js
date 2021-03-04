@@ -1,4 +1,5 @@
 node_modules
+temp
 .ts.flag
 .idea
 .DS_Store
