@@ -1,10 +1,10 @@
 import Backend from "./backend.js";
 import Hex from "./hex.js";
 import Rect from "./rect.js";
-import Tile from "./tile.js";
-import TileGL from "./tile-gl.js";
 import Term from "./term.js";
-import { DisplayOptions, DisplayData } from "./types.js";
+import TileGL from "./tile-gl.js";
+import Tile from "./tile.js";
+import { DisplayData, DisplayOptions } from "./types.js";
 /**
  * @class Visual map display
  */

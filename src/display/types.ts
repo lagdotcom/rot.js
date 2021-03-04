@@ -16,8 +16,20 @@ export interface DisplayOptions {
 	tileWidth: number;
 	tileHeight: number;
 	tileMap: { [key: string]: [number, number] };
-	tileSet: null | HTMLCanvasElement | HTMLImageElement | HTMLVideoElement | ImageBitmap;
+	tileSet:
+		| null
+		| HTMLCanvasElement
+		| HTMLImageElement
+		| HTMLVideoElement
+		| ImageBitmap;
 	tileColorize: Boolean;
+	context: null | CanvasRenderingContext2D;
 }
 
-export type DisplayData = [number, number, string | string[] | null, string, string];
+export type DisplayData = [
+	x: number,
+	y: number,
+	ch: string | string[] | null,
+	fg: string,
+	bg: string
+];

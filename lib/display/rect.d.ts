@@ -1,5 +1,5 @@
 import Canvas from "./canvas.js";
-import { DisplayOptions, DisplayData } from "./types.js";
+import { DisplayData, DisplayOptions } from "./types.js";
 /**
  * @class Rectangular backend
  * @private

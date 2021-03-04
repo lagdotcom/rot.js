@@ -2,6 +2,7 @@ import Backend from "./backend.js";
 import { DisplayOptions } from "./types.js";
 export default abstract class Canvas extends Backend {
     _ctx: CanvasRenderingContext2D;
+    fontStyle: string;
     constructor();
     schedule(cb: () => void): void;
     getContainer(): HTMLCanvasElement;

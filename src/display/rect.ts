@@ -1,5 +1,5 @@
 import Canvas from "./canvas.js";
-import { DisplayOptions, DisplayData } from "./types.js";
+import { DisplayData, DisplayOptions } from "./types.js";
 
 /**
  * @class Rectangular backend
@@ -8,7 +8,7 @@ import { DisplayOptions, DisplayData } from "./types.js";
 export default class Rect extends Canvas {
 	_spacingX: number;
 	_spacingY: number;
-	_canvasCache: {[key:string]: HTMLCanvasElement};
+	_canvasCache: { [key: string]: HTMLCanvasElement };
 	_options!: DisplayOptions;
 
 	static cache = false;
@@ -36,7 +36,7 @@ export default class Rect extends Canvas {
 	_drawWithCache(data: DisplayData) {
 		let [x, y, ch, fg, bg] = data;
 
-		let hash = ""+ch+fg+bg;
+		let hash = "" + ch + fg + bg;
 		let canvas;
 		if (hash in this._canvasCache) {
 			canvas = this._canvasCache[hash];
@@ -47,41 +47,57 @@ export default class Rect extends Canvas {
 			canvas.width = this._spacingX;
 			canvas.height = this._spacingY;
 			ctx.fillStyle = bg;
-			ctx.fillRect(b, b, canvas.width-b, canvas.height-b);
-			
+			ctx.fillRect(b, b, canvas.width - b, canvas.height - b);
+
 			if (ch) {
 				ctx.fillStyle = fg;
-				ctx.font = this._ctx.font;
+				ctx.font = this.fontStyle;
 				ctx.textAlign = "center";
 				ctx.textBaseline = "middle";
 
 				let chars = ([] as string[]).concat(ch);
-				for (let i=0;i<chars.length;i++) {
-					ctx.fillText(chars[i], this._spacingX/2, Math.ceil(this._spacingY/2));
+				for (let i = 0; i < chars.length; i++) {
+					ctx.fillText(
+						chars[i],
+						this._spacingX / 2,
+						Math.ceil(this._spacingY / 2)
+					);
 				}
 			}
 			this._canvasCache[hash] = canvas;
 		}
-		
-		this._ctx.drawImage(canvas, x*this._spacingX, y*this._spacingY);
+
+		this._ctx.drawImage(canvas, x * this._spacingX, y * this._spacingY);
 	}
 
 	_drawNoCache(data: DisplayData, clearBefore: boolean) {
 		let [x, y, ch, fg, bg] = data;
 
-		if (clearBefore) { 
+		if (clearBefore) {
 			let b = this._options.border;
 			this._ctx.fillStyle = bg;
-			this._ctx.fillRect(x*this._spacingX + b, y*this._spacingY + b, this._spacingX - b, this._spacingY - b);
+			this._ctx.fillRect(
+				x * this._spacingX + b,
+				y * this._spacingY + b,
+				this._spacingX - b,
+				this._spacingY - b
+			);
 		}
-		
-		if (!ch) { return; }
+
+		if (!ch) {
+			return;
+		}
 
 		this._ctx.fillStyle = fg;
+		this._ctx.font = this.fontStyle;
 
 		let chars = ([] as string[]).concat(ch);
-		for (let i=0;i<chars.length;i++) {
-			this._ctx.fillText(chars[i], (x+0.5) * this._spacingX, Math.ceil((y+0.5) * this._spacingY));
+		for (let i = 0; i < chars.length; i++) {
+			this._ctx.fillText(
+				chars[i],
+				(x + 0.5) * this._spacingX,
+				Math.ceil((y + 0.5) * this._spacingY)
+			);
 		}
 	}
 
@@ -101,16 +117,17 @@ export default class Rect extends Canvas {
 		let width = Math.ceil(this._ctx.measureText("W").width);
 		this._ctx.font = oldFont;
 		let ratio = width / 100;
-			
-		let widthFraction = ratio * boxHeight / boxWidth;
-		if (widthFraction > 1) { /* too wide with current aspect ratio */
+
+		let widthFraction = (ratio * boxHeight) / boxWidth;
+		if (widthFraction > 1) {
+			/* too wide with current aspect ratio */
 			boxHeight = Math.floor(boxHeight / widthFraction);
 		}
 		return Math.floor(boxHeight / this._options.spacing);
 	}
 
-	_normalizedEventToPosition(x:number, y:number): [number, number] {
-		return [Math.floor(x/this._spacingX), Math.floor(y/this._spacingY)];
+	_normalizedEventToPosition(x: number, y: number): [number, number] {
+		return [Math.floor(x / this._spacingX), Math.floor(y / this._spacingY)];
 	}
 
 	_updateSize() {
@@ -120,7 +137,10 @@ export default class Rect extends Canvas {
 		this._spacingY = Math.ceil(opts.spacing * opts.fontSize);
 
 		if (opts.forceSquareRatio) {
-			this._spacingX = this._spacingY = Math.max(this._spacingX, this._spacingY);
+			this._spacingX = this._spacingY = Math.max(
+				this._spacingX,
+				this._spacingY
+			);
 		}
 
 		this._ctx.canvas.width = opts.width * this._spacingX;
