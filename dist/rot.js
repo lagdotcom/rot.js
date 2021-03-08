@@ -6727,7 +6727,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
         var x = cx + dir[0];
         var y = cy + dir[1];
 
-        if (!this._passableCallback(x, y)) {
+        if (!this._passableCallback(x, y, cx, cy)) {
           continue;
         }
 

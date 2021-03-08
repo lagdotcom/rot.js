@@ -1,5 +1,5 @@
 export declare type ComputeCallback = (x: number, y: number) => any;
-export declare type PassableCallback = (x: number, y: number) => boolean;
+export declare type PassableCallback = (x: number, y: number, sx: number, sy: number) => boolean;
 export interface Options {
     topology: 4 | 6 | 8;
 }
