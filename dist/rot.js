@@ -941,6 +941,96 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
     tokenize: tokenize
   });
   /**
+   * Always positive modulus
+   * @param x Operand
+   * @param n Modulus
+   * @returns x modulo n
+   */
+
+  function mod(x, n) {
+    return (x % n + n) % n;
+  }
+
+  function clamp(val, min, max) {
+    if (min === void 0) {
+      min = 0;
+    }
+
+    if (max === void 0) {
+      max = 1;
+    }
+
+    if (val < min) return min;
+    if (val > max) return max;
+    return val;
+  }
+
+  function capitalize(string) {
+    return string.charAt(0).toUpperCase() + string.substring(1);
+  }
+  /**
+   * Format a string in a flexible way. Scans for %s strings and replaces them with arguments. List of patterns is modifiable via String.format.map.
+   * @param {string} template
+   * @param {any} [argv]
+   */
+
+
+  function format(template) {
+    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      args[_key - 1] = arguments[_key];
+    }
+
+    var map = format.map;
+
+    var replacer = function replacer(match, group1, group2, index) {
+      if (template.charAt(index - 1) == "%") {
+        return match.substring(1);
+      }
+
+      if (!args.length) {
+        return match;
+      }
+
+      var obj = args[0];
+      var group = group1 || group2;
+      var parts = group.split(",");
+      var name = parts.shift() || "";
+      var method = map[name.toLowerCase()];
+
+      if (!method) {
+        return match;
+      }
+
+      obj = args.shift();
+      var replaced = obj[method].apply(obj, parts);
+      var first = name.charAt(0);
+
+      if (first != first.toLowerCase()) {
+        replaced = capitalize(replaced);
+      }
+
+      return replaced;
+    };
+
+    return template.replace(/%(?:([a-z]+)|(?:{([^}]+)}))/gi, replacer);
+  }
+
+  function first(maybe) {
+    return Array.isArray(maybe) ? maybe[0] : maybe;
+  }
+
+  format.map = {
+    s: "toString"
+  };
+  var util = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    mod: mod,
+    clamp: clamp,
+    capitalize: capitalize,
+    format: format,
+    first: first
+  });
+  /**
    * @class Abstract display backend module
    * @private
    */
@@ -1023,95 +1113,10 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
     return Canvas;
   }(Backend);
   /**
-   * Always positive modulus
-   * @param x Operand
-   * @param n Modulus
-   * @returns x modulo n
-   */
-
-
-  function mod(x, n) {
-    return (x % n + n) % n;
-  }
-
-  function clamp(val, min, max) {
-    if (min === void 0) {
-      min = 0;
-    }
-
-    if (max === void 0) {
-      max = 1;
-    }
-
-    if (val < min) return min;
-    if (val > max) return max;
-    return val;
-  }
-
-  function capitalize(string) {
-    return string.charAt(0).toUpperCase() + string.substring(1);
-  }
-  /**
-   * Format a string in a flexible way. Scans for %s strings and replaces them with arguments. List of patterns is modifiable via String.format.map.
-   * @param {string} template
-   * @param {any} [argv]
-   */
-
-
-  function format(template) {
-    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-      args[_key - 1] = arguments[_key];
-    }
-
-    var map = format.map;
-
-    var replacer = function replacer(match, group1, group2, index) {
-      if (template.charAt(index - 1) == "%") {
-        return match.substring(1);
-      }
-
-      if (!args.length) {
-        return match;
-      }
-
-      var obj = args[0];
-      var group = group1 || group2;
-      var parts = group.split(",");
-      var name = parts.shift() || "";
-      var method = map[name.toLowerCase()];
-
-      if (!method) {
-        return match;
-      }
-
-      obj = args.shift();
-      var replaced = obj[method].apply(obj, parts);
-      var first = name.charAt(0);
-
-      if (first != first.toLowerCase()) {
-        replaced = capitalize(replaced);
-      }
-
-      return replaced;
-    };
-
-    return template.replace(/%(?:([a-z]+)|(?:{([^}]+)}))/gi, replacer);
-  }
-
-  format.map = {
-    "s": "toString"
-  };
-  var util = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    mod: mod,
-    clamp: clamp,
-    capitalize: capitalize,
-    format: format
-  });
-  /**
    * @class Hexagonal backend
    * @private
    */
+
 
   var Hex = /*#__PURE__*/function (_Canvas) {
     _inheritsLoose(Hex, _Canvas);
@@ -1141,7 +1146,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
       }
 
       if (clearBefore) {
-        this._ctx.fillStyle = bg;
+        this._ctx.fillStyle = first(bg);
 
         this._fill(px[0], px[1]);
       }
@@ -1150,7 +1155,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
         return;
       }
 
-      this._ctx.fillStyle = fg;
+      this._ctx.fillStyle = first(fg);
       var chars = [].concat(ch);
 
       for (var i = 0; i < chars.length; i++) {
@@ -1326,11 +1331,11 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
         var ctx = canvas.getContext("2d");
         canvas.width = this._spacingX;
         canvas.height = this._spacingY;
-        ctx.fillStyle = bg;
+        ctx.fillStyle = first(bg);
         ctx.fillRect(b, b, canvas.width - b, canvas.height - b);
 
         if (ch) {
-          ctx.fillStyle = fg;
+          ctx.fillStyle = first(fg);
           ctx.font = this.fontStyle;
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
@@ -1356,7 +1361,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
       if (clearBefore) {
         var b = this._options.border;
-        this._ctx.fillStyle = bg;
+        this._ctx.fillStyle = first(bg);
 
         this._ctx.fillRect(x * this._spacingX + b, y * this._spacingY + b, this._spacingX - b, this._spacingY - b);
       }
@@ -1365,7 +1370,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
         return;
       }
 
-      this._ctx.fillStyle = fg;
+      this._ctx.fillStyle = first(fg);
       this._ctx.font = this.fontStyle;
       var chars = [].concat(ch);
 
@@ -1949,14 +1954,14 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
       } // determine if we need to change colors
 
 
-      var newColor = colorToAnsi(fg, bg);
+      var newColor = colorToAnsi(first(fg), first(bg));
 
       if (newColor !== this._lastColor) {
         process.stdout.write(newColor);
         this._lastColor = newColor;
       }
 
-      if (ch != '\t') {
+      if (ch != "\t") {
         // write the provided symbol to the display
         var chars = [].concat(ch);
         process.stdout.write(chars[0]);
@@ -2058,7 +2063,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
         if (opts.tileColorize) {
           gl.clearColor(0, 0, 0, 0);
         } else {
-          gl.clearColor.apply(gl, parseColor(bg));
+          gl.clearColor.apply(gl, parseColor(first(bg)));
         }
 
         gl.clear(gl.COLOR_BUFFER_BIT);
@@ -2091,47 +2096,38 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       }
       /*
-      
-      
-              for (let i=0;i<chars.length;i++) {
-      
-                  if (this._options.tileColorize) { // apply colorization
-                      let canvas = this._colorCanvas;
-                      let context = canvas.getContext("2d") as CanvasRenderingContext2D;
-                      context.globalCompositeOperation = "source-over";
-                      context.clearRect(0, 0, tileWidth, tileHeight);
-      
-                      let fg = fgs[i];
-                      let bg = bgs[i];
-      
-                      context.drawImage(
-                          this._options.tileSet!,
-                          tile[0], tile[1], tileWidth, tileHeight,
-                          0, 0, tileWidth, tileHeight
-                      );
-      
-                      if (fg != "transparent") {
-                          context.fillStyle = fg;
-                          context.globalCompositeOperation = "source-atop";
-                          context.fillRect(0, 0, tileWidth, tileHeight);
-                      }
-      
-                      if (bg != "transparent") {
-                          context.fillStyle = bg;
-                          context.globalCompositeOperation = "destination-over";
-                          context.fillRect(0, 0, tileWidth, tileHeight);
-                      }
-      
-                      this._ctx.drawImage(canvas, x*tileWidth, y*tileHeight, tileWidth, tileHeight);
-                  } else { // no colorizing, easy
-                      this._ctx.drawImage(
-                          this._options.tileSet!,
-                          tile[0], tile[1], tileWidth, tileHeight,
-                          x*tileWidth, y*tileHeight, tileWidth, tileHeight
-                      );
-                  }
+          for (let i=0;i<chars.length;i++) {
+            if (this._options.tileColorize) { // apply colorization
+              let canvas = this._colorCanvas;
+              let context = canvas.getContext("2d") as CanvasRenderingContext2D;
+              context.globalCompositeOperation = "source-over";
+              context.clearRect(0, 0, tileWidth, tileHeight);
+                let fg = fgs[i];
+              let bg = bgs[i];
+                context.drawImage(
+                  this._options.tileSet!,
+                  tile[0], tile[1], tileWidth, tileHeight,
+                  0, 0, tileWidth, tileHeight
+              );
+                if (fg != "transparent") {
+                  context.fillStyle = fg;
+                  context.globalCompositeOperation = "source-atop";
+                  context.fillRect(0, 0, tileWidth, tileHeight);
               }
-      
+                if (bg != "transparent") {
+                  context.fillStyle = bg;
+                  context.globalCompositeOperation = "destination-over";
+                  context.fillRect(0, 0, tileWidth, tileHeight);
+              }
+                this._ctx.drawImage(canvas, x*tileWidth, y*tileHeight, tileWidth, tileHeight);
+          } else { // no colorizing, easy
+              this._ctx.drawImage(
+                  this._options.tileSet!,
+                  tile[0], tile[1], tileWidth, tileHeight,
+                  x*tileWidth, y*tileHeight, tileWidth, tileHeight
+              );
+          }
+      }
       */
 
     };
@@ -2322,7 +2318,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
         if (this._options.tileColorize) {
           this._ctx.clearRect(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
         } else {
-          this._ctx.fillStyle = bg;
+          this._ctx.fillStyle = first(bg);
 
           this._ctx.fillRect(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
         }
@@ -2458,7 +2454,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
     _proto9.DEBUG = function DEBUG(x, y, what) {
       var colors = [this._options.bg, this._options.fg];
-      this.draw(x, y, null, null, colors[what % colors.length]);
+      this.draw(x, y, " ", undefined, colors[what % colors.length]);
     }
     /**
      * Clear the whole display (cover it with background color)
@@ -2558,8 +2554,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
      * @param {int} x
      * @param {int} y
      * @param {string || string[]} ch One or more chars (will be overlapping themselves)
-     * @param {string} [fg] foreground color
-     * @param {string} [bg] background color
+     * @param {string || string[]} [fg] foreground color
+     * @param {string || string[]} [bg] background color
      */
     ;
 

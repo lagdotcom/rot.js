@@ -1,3 +1,4 @@
+import { first } from "../util.js";
 import Canvas from "./canvas.js";
 import { DisplayData, DisplayOptions } from "./types.js";
 
@@ -46,11 +47,11 @@ export default class Rect extends Canvas {
 			let ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 			canvas.width = this._spacingX;
 			canvas.height = this._spacingY;
-			ctx.fillStyle = bg;
+			ctx.fillStyle = first(bg);
 			ctx.fillRect(b, b, canvas.width - b, canvas.height - b);
 
 			if (ch) {
-				ctx.fillStyle = fg;
+				ctx.fillStyle = first(fg);
 				ctx.font = this.fontStyle;
 				ctx.textAlign = "center";
 				ctx.textBaseline = "middle";
@@ -75,7 +76,7 @@ export default class Rect extends Canvas {
 
 		if (clearBefore) {
 			let b = this._options.border;
-			this._ctx.fillStyle = bg;
+			this._ctx.fillStyle = first(bg);
 			this._ctx.fillRect(
 				x * this._spacingX + b,
 				y * this._spacingY + b,
@@ -88,7 +89,7 @@ export default class Rect extends Canvas {
 			return;
 		}
 
-		this._ctx.fillStyle = fg;
+		this._ctx.fillStyle = first(fg);
 		this._ctx.font = this.fontStyle;
 
 		let chars = ([] as string[]).concat(ch);

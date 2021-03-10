@@ -13,3 +13,4 @@ export declare function capitalize(string: string): string;
  * @param {any} [argv]
  */
 export declare function format(template: string, ...args: any[]): string;
+export declare function first<T>(maybe: T[] | T): T;

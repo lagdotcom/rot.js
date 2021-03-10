@@ -71,10 +71,10 @@ export default class Display {
      * @param {int} x
      * @param {int} y
      * @param {string || string[]} ch One or more chars (will be overlapping themselves)
-     * @param {string} [fg] foreground color
-     * @param {string} [bg] background color
+     * @param {string || string[]} [fg] foreground color
+     * @param {string || string[]} [bg] background color
      */
-    draw(x: number, y: number, ch: string | string[] | null, fg: string | null, bg: string | null): void;
+    draw(x: number, y: number, ch: string | string[], fg?: string | string[], bg?: string | string[]): void;
     /**
      * Draws a text at given position. Optionally wraps at a maximum length. Currently does not work with hex layout.
      * @param {int} x

@@ -29,7 +29,7 @@ export interface DisplayOptions {
 export type DisplayData = [
 	x: number,
 	y: number,
-	ch: string | string[] | null,
-	fg: string,
-	bg: string
+	ch: string | string[],
+	fg: string | string[],
+	bg: string | string[]
 ];

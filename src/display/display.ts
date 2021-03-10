@@ -73,7 +73,7 @@ export default class Display {
 	 */
 	DEBUG(x: number, y: number, what: number) {
 		let colors = [this._options.bg, this._options.fg];
-		this.draw(x, y, null, null, colors[what % colors.length]);
+		this.draw(x, y, " ", undefined, colors[what % colors.length]);
 	}
 
 	/**
@@ -171,15 +171,15 @@ export default class Display {
 	 * @param {int} x
 	 * @param {int} y
 	 * @param {string || string[]} ch One or more chars (will be overlapping themselves)
-	 * @param {string} [fg] foreground color
-	 * @param {string} [bg] background color
+	 * @param {string || string[]} [fg] foreground color
+	 * @param {string || string[]} [bg] background color
 	 */
 	draw(
 		x: number,
 		y: number,
-		ch: string | string[] | null,
-		fg: string | null,
-		bg: string | null
+		ch: string | string[],
+		fg?: string | string[],
+		bg?: string | string[]
 	) {
 		if (!fg) {
 			fg = this._options.fg;

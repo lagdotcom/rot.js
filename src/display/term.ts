@@ -1,6 +1,7 @@
+import * as Color from "../color.js";
+import { first } from "../util.js";
 import Backend from "./backend.js";
 import { DisplayData, DisplayOptions } from "./types.js";
-import * as Color from "../color.js";
 
 function clearToAnsi(bg: string) {
 	return `\x1b[0;48;5;${termcolor(bg)}m\x1b[2J`;
@@ -11,7 +12,7 @@ function colorToAnsi(fg: string, bg: string) {
 }
 
 function positionToAnsi(x: number, y: number) {
-	return `\x1b[${y+1};${x+1}H`;
+	return `\x1b[${y + 1};${x + 1}H`;
 }
 
 function termcolor(color: string) {
@@ -22,9 +23,8 @@ function termcolor(color: string) {
 	let r = Math.floor(rgb[0] * COLOR_RATIO);
 	let g = Math.floor(rgb[1] * COLOR_RATIO);
 	let b = Math.floor(rgb[2] * COLOR_RATIO);
-	return r*36 + g*6 + b*1 + 16;
+	return r * 36 + g * 6 + b * 1 + 16;
 }
-
 
 export default class Term extends Backend {
 	_offset: [number, number];
@@ -38,13 +38,17 @@ export default class Term extends Backend {
 		this._lastColor = "";
 	}
 
-	schedule(cb: ()=>void) { setTimeout(cb, 1000/60); }
+	schedule(cb: () => void) {
+		setTimeout(cb, 1000 / 60);
+	}
 
 	setOptions(options: DisplayOptions) {
 		super.setOptions(options);
 		let size = [options.width, options.height];
 		let avail = this.computeSize();
-		this._offset = avail.map((val, index) => Math.floor((val as number - size[index])/2)) as [number, number];
+		this._offset = avail.map((val, index) =>
+			Math.floor(((val as number) - size[index]) / 2)
+		) as [number, number];
 	}
 
 	clear() {
@@ -59,8 +63,12 @@ export default class Term extends Backend {
 		let dx = this._offset[0] + x;
 		let dy = this._offset[1] + y;
 		let size = this.computeSize();
-		if (dx < 0 || dx >= size[0]) { return; }
-		if (dy < 0 || dy >= size[1]) { return; }
+		if (dx < 0 || dx >= size[0]) {
+			return;
+		}
+		if (dy < 0 || dy >= size[1]) {
+			return;
+		}
 		if (dx !== this._cursor[0] || dy !== this._cursor[1]) {
 			process.stdout.write(positionToAnsi(dx, dy));
 			this._cursor[0] = dx;
@@ -70,20 +78,24 @@ export default class Term extends Backend {
 		// terminals automatically clear, but if we're clearing when we're
 		// not otherwise provided with a character, just use a space instead
 		if (clearBefore) {
-			if (!ch) { ch = " "; }
+			if (!ch) {
+				ch = " ";
+			}
 		}
-			
+
 		// if we're not clearing and not provided with a character, do nothing
-		if (!ch) { return; }
+		if (!ch) {
+			return;
+		}
 
 		// determine if we need to change colors
-		let newColor = colorToAnsi(fg, bg);
+		let newColor = colorToAnsi(first(fg), first(bg));
 		if (newColor !== this._lastColor) {
 			process.stdout.write(newColor);
 			this._lastColor = newColor;
 		}
 
-		if (ch != '\t') {
+		if (ch != "\t") {
 			// write the provided symbol to the display
 			let chars = ([] as string[]).concat(ch);
 			process.stdout.write(chars[0]);
@@ -97,7 +109,13 @@ export default class Term extends Backend {
 		}
 	}
 
-	computeFontSize(): number { throw new Error("Terminal backend has no notion of font size"); }
-	eventToPosition(x:number, y:number) { return [x, y] as [number, number]; }
-	computeSize() { return [process.stdout.columns, process.stdout.rows] as [number, number]; }
+	computeFontSize(): number {
+		throw new Error("Terminal backend has no notion of font size");
+	}
+	eventToPosition(x: number, y: number) {
+		return [x, y] as [number, number];
+	}
+	computeSize() {
+		return [process.stdout.columns, process.stdout.rows] as [number, number];
+	}
 }

@@ -1,5 +1,5 @@
 import Backend from "./backend.js";
-import { DisplayOptions, DisplayData } from "./types.js";
+import { DisplayData, DisplayOptions } from "./types.js";
 /**
  * @class Tile backend
  * @private
